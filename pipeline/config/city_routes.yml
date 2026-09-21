@@ -1,0 +1,24 @@
+# Curated allowlist of Östgötatrafiken city-transit routes (Linköping stadsbuss) vs regional.
+# Matched by route_id only (NOT route_short_name) - short_names "2"/"3" also exist as Norrköping
+# tram routes (route_type 900, route_ids 9011005000200000/9011005000300000) and must not be
+# pulled in. See docs/roadmap.md Phase 1 step 6.
+route_ids:
+  - "9011005020100000" # 1
+  - "9011005020200000" # 2
+  - "9011005020300000" # 3
+  - "9011005020400000" # 4
+  - "9011005020500000" # 5
+  - "9011005020600000" # 6
+  - "9011005021000000" # 10
+  - "9011005021100000" # 11
+  - "9011005021200000" # 12
+  - "9011005021300000" # 13
+  - "9011005021400000" # 14
+  - "9011005021500000" # 15
+  - "9011005021600000" # 16
+  - "9011005021700000" # 17
+  - "9011005022000000" # 20
+  - "9011005022100000" # 21
+  - "9011005022200000" # 22
+  - "9011005022600000" # 26
+route_short_names: []
