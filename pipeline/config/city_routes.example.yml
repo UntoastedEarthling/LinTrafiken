@@ -1,0 +1,5 @@
+# Curated allowlist of Östgötatrafiken city-transit routes (vs regional).
+# Copy to city_routes.yml and fill in once routes.txt has been inspected.
+# Match on route_id if stable across GTFS updates, otherwise route_short_name.
+route_ids: []
+route_short_names: []

@@ -1,0 +1,28 @@
+# Environment
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Node / frontend
+node_modules/
+dist/
+.vite/
+
+# Data & generated artifacts
+pipeline/data/
+*.pmtiles
+*.mbtiles
+*.gpkg
+valhalla/
+
+# OS / editor
+.DS_Store
+Thumbs.db

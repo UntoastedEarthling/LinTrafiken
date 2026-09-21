@@ -1,0 +1,10 @@
+gtfs-kit
+pandas
+geopandas
+shapely
+psycopg2-binary
+sqlalchemy
+python-dotenv
+requests
+pyyaml
+h3

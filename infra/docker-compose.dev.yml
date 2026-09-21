@@ -1,0 +1,29 @@
+services:
+  postgis:
+    image: postgis/postgis:16-3.4
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-lintrafiken}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-lintrafiken}
+      POSTGRES_DB: ${POSTGRES_DB:-lintrafiken}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgis_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-lintrafiken}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Phase 3 only (walking-catchment isochrones). Not started by the default
+  # profile - needs a built OSM extract under ./valhalla first.
+  valhalla:
+    image: ghcr.io/valhalla/valhalla:latest
+    profiles: ["valhalla"]
+    volumes:
+      - ./valhalla:/custom_files
+    ports:
+      - "8002:8002"
+
+volumes:
+  postgis_data:
