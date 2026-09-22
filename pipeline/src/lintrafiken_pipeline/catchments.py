@@ -1,4 +1,4 @@
-"""Phase 3 entrypoint: compute the 5/10/15-min walking catchments and export as PMTiles.
+"""Phase 3 entrypoint: compute the 2/5/10/15-min walking catchments and export as PMTiles.
 
 Requires the Valhalla service running locally (`docker compose --profile valhalla up -d valhalla`)
 with tiles already built from the clipped Linköping OSM extract.
@@ -25,7 +25,9 @@ def main() -> None:
     export_geojson(gdf, OUTPUT_PATH)
     logger.info("Exported %d catchment bands to %s", len(gdf), OUTPUT_PATH)
 
-    tile_to_pmtiles(OUTPUT_PATH, layer_name="catchments")
+    # Only 4 large, complex polygons here (not thousands of hexes) - use a much lower
+    # simplification multiplier (tippecanoe rejects 0) to keep the fine isochrone boundary detail.
+    tile_to_pmtiles(OUTPUT_PATH, layer_name="catchments", extra_args=["--simplification=0.1"])
 
 
 if __name__ == "__main__":

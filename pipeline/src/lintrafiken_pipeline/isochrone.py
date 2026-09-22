@@ -1,9 +1,10 @@
-"""Compute 5/10/15-min walking catchments around classified city-transit stops via Valhalla.
+"""Compute 2/5/10/15-min walking catchments around classified city-transit stops via Valhalla.
 
 Valhalla's /isochrone contours are cumulative (the 15-min polygon already contains the
-10-min and 5-min areas), so unioning same-time-band polygons across all stops and drawing
-them 15 -> 10 -> 5 (largest first) gives the concentric-catchment look from the roadmap
-without needing any exclusive-ring differencing.
+10-min, 5-min, and 2-min areas), so after unioning same-time-band polygons across all stops,
+each band's union is subtracted from the next larger one's, turning them into non-overlapping
+exclusive rings. This is required so the map's stacked fill layers render with consistent
+transparency instead of compounding opacity where bands used to overlap.
 """
 from __future__ import annotations
 
@@ -22,7 +23,7 @@ from . import config
 
 logger = logging.getLogger(__name__)
 
-CONTOUR_MINUTES = [5, 10, 15]
+CONTOUR_MINUTES = [2, 5, 10, 15]
 MAX_WORKERS = 8
 REQUEST_TIMEOUT_SECONDS = 30
 
@@ -44,7 +45,9 @@ def _query_isochrone(stop_lon: float, stop_lat: float) -> dict[int, list]:
         "contours": [{"time": m} for m in CONTOUR_MINUTES],
         "polygons": True,
         "denoise": 0.1,
-        "generalize": 20,
+        # Lower generalize = boundary hugs the street network more closely (finer resolution,
+        # more vertices) instead of the coarser/sharper default 20m simplification tolerance.
+        "generalize": 5,
     }
     resp = requests.post(
         f"{config.VALHALLA_URL}/isochrone", json=body, timeout=REQUEST_TIMEOUT_SECONDS
@@ -62,7 +65,7 @@ def _query_isochrone(stop_lon: float, stop_lat: float) -> dict[int, list]:
 
 
 def compute_catchments(engine: Engine) -> gpd.GeoDataFrame:
-    """Return a 3-row GeoDataFrame (`minutes`, `geometry`) with unioned 5/10/15-min catchments."""
+    """Return a 4-row GeoDataFrame (`minutes`, `geometry`) of exclusive 2/5/10/15-min rings."""
     stops = _fetch_stops(engine)
     logger.info("Querying Valhalla isochrones for %d stops", len(stops))
 
@@ -87,11 +90,19 @@ def compute_catchments(engine: Engine) -> gpd.GeoDataFrame:
     if n_failed:
         logger.warning("%d/%d stops failed isochrone lookup", n_failed, len(stops))
 
-    rows = []
+    unions: dict[int, object] = {}
     for minutes in CONTOUR_MINUTES:
         geoms = geoms_by_minutes[minutes]
         if not geoms:
             raise ValueError(f"No isochrone geometry collected for {minutes}-min contour")
-        rows.append({"minutes": minutes, "geometry": unary_union(geoms)})
+        unions[minutes] = unary_union(geoms)
+
+    # Subtract each band's union from the next larger one to get non-overlapping rings.
+    rows = []
+    prev_union = None
+    for minutes in sorted(CONTOUR_MINUTES):
+        ring = unions[minutes] if prev_union is None else unions[minutes].difference(prev_union)
+        rows.append({"minutes": minutes, "geometry": ring})
+        prev_union = unions[minutes]
 
     return gpd.GeoDataFrame(rows, crs="EPSG:4326")

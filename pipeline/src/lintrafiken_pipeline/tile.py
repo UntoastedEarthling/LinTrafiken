@@ -19,7 +19,7 @@ MIN_ZOOM = 9
 MAX_ZOOM = 14
 
 
-def tile_to_pmtiles(geojson_path: Path, layer_name: str) -> Path:
+def tile_to_pmtiles(geojson_path: Path, layer_name: str, extra_args: list[str] | None = None) -> Path:
     """Tile `geojson_path` into a same-named .pmtiles file via tippecanoe (Docker) + pmtiles conversion."""
     mbtiles_path = geojson_path.with_suffix(".mbtiles")
     pmtiles_path = geojson_path.with_suffix(".pmtiles")
@@ -35,6 +35,7 @@ def tile_to_pmtiles(geojson_path: Path, layer_name: str) -> Path:
             "--no-tile-size-limit", "--no-feature-limit",
             "--force",
             "-l", layer_name,
+            *(extra_args or []),
             f"/data/{geojson_path.name}",
         ],
         check=True,
