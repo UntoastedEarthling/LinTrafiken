@@ -18,6 +18,8 @@ GTFS_OPERATOR = "otraf"  # Östgötatrafiken, per Trafiklab GTFS Regional
 GTFS_URL = f"https://opendata.samtrafiken.se/gtfs/{GTFS_OPERATOR}/{GTFS_OPERATOR}.zip"
 TRAFIKLAB_API_KEY = os.environ.get("TRAFIKLAB_API_KEY", "")
 
+VALHALLA_URL = os.environ.get("VALHALLA_URL", "http://localhost:8002")
+
 POSTGRES_USER = os.environ.get("POSTGRES_USER", "lintrafiken")
 POSTGRES_PASSWORD = os.environ.get("POSTGRES_PASSWORD", "lintrafiken")
 POSTGRES_DB = os.environ.get("POSTGRES_DB", "lintrafiken")

@@ -17,9 +17,15 @@ services:
 
   # Phase 3 only (walking-catchment isochrones). Not started by the default
   # profile - needs a built OSM extract under ./valhalla first.
+  # Uses the "scripted" image variant, which auto-builds tiles from any
+  # .osm.pbf file(s) found in /custom_files on container start/restart.
   valhalla:
-    image: ghcr.io/valhalla/valhalla:latest
+    image: ghcr.io/valhalla/valhalla-scripted:latest
     profiles: ["valhalla"]
+    environment:
+      use_tiles_ignore_pbf: "True"
+      build_transit: "False"
+      serve_tiles: "True"
     volumes:
       - ./valhalla:/custom_files
     ports:
