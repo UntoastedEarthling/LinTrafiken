@@ -56,7 +56,7 @@ jobs:
           for i in $(seq 1 60); do
             code=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:8002/isochrone \
               -H "Content-Type: application/json" \
-              -d '{"locations":[{"lat":58.4108,"lon":15.6214}],"costing":"pedestrian","contours":[{"time":2}],"polygons":true}')
+              -d '{"locations":[{"lat":58.4108,"lon":15.6214}],"costing":"pedestrian","contours":[{"time":2}],"polygons":true}' || true)
             if [ "$code" = "200" ]; then
               echo "Valhalla ready"
               exit 0
