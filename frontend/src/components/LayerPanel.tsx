@@ -84,7 +84,7 @@ export function LayerPanel({
     <div className="absolute top-4 left-4 w-80 rounded-2xl border border-white/30 bg-white/40 p-4 shadow-lg backdrop-blur-md">
       <h1 className="text-lg font-semibold text-stone-800">LinTrafiken</h1>
       <p className="mb-3 text-xs text-stone-500">
-        Explore Linköping's public transit system based on open GTFS data.
+        Explore Linköping's local public transit system based on open GTFS data.
       </p>
 
       <div className="mb-3 flex rounded-full bg-stone-200/70 p-1 text-sm font-medium">
