@@ -1,0 +1,91 @@
+name: Data refresh
+
+# GTFS/street data rarely changes, so this only runs weekly (Sundays) plus on-demand.
+# GTFS download itself is further guarded by download.py's ETag cache, restored/saved
+# across runs below - a manual re-run the same week costs zero extra Trafiklab requests
+# if the feed hasn't changed.
+on:
+  schedule:
+    - cron: "0 7 * * 0" # Sunday 07:00 UTC - after Trafiklab's daily 03:00-07:00 CET/CEST refresh window
+  workflow_dispatch:
+
+concurrency:
+  group: data-refresh
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write # required for AWS OIDC role assumption
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    env:
+      TRAFIKLAB_API_KEY: ${{ secrets.TRAFIKLAB_API_KEY }}
+      VALHALLA_URL: http://localhost:8002
+    steps:
+      - uses: actions/checkout@v4
+
+      # Persists pipeline/data/raw/otraf.{zip,etag} across otherwise-ephemeral runners.
+      # Cache keys are immutable, so we key on run_id and always fall back to the most
+      # recent entry via restore-keys; the post-job step then saves a fresh entry.
+      - name: Restore GTFS cache
+        uses: actions/cache@v4
+        with:
+          path: pipeline/data/raw
+          key: gtfs-cache-${{ github.run_id }}
+          restore-keys: |
+            gtfs-cache-
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install pipeline
+        working-directory: pipeline
+        run: pip install -r requirements.txt -e .
+
+      - name: Start PostGIS
+        run: docker compose -f infra/docker-compose.dev.yml up -d postgis --wait
+
+      - name: Start Valhalla
+        run: docker compose -f infra/docker-compose.dev.yml --profile valhalla up -d valhalla
+
+      - name: Wait for Valhalla to be ready
+        run: |
+          for i in $(seq 1 60); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:8002/isochrone \
+              -H "Content-Type: application/json" \
+              -d '{"locations":[{"lat":58.4108,"lon":15.6214}],"costing":"pedestrian","contours":[{"time":2}],"polygons":true}')
+            if [ "$code" = "200" ]; then
+              echo "Valhalla ready"
+              exit 0
+            fi
+            echo "Waiting for Valhalla... (attempt $i, http $code)"
+            sleep 5
+          done
+          echo "Valhalla did not become ready in time" >&2
+          exit 1
+
+      - name: Run pipeline
+        working-directory: pipeline
+        run: |
+          python -m lintrafiken_pipeline.ingest
+          python -m lintrafiken_pipeline.heatmap
+          python -m lintrafiken_pipeline.catchments
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Sync PMTiles to S3
+        run: |
+          aws s3 sync pipeline/data/processed/ "s3://${{ vars.S3_BUCKET_NAME }}/tiles/" \
+            --exclude "*" --include "*.pmtiles"
+
+      - name: Invalidate CloudFront cache for tiles
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id "${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}" \
+            --paths "/tiles/*"
