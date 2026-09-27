@@ -3,7 +3,7 @@ pandas
 geopandas
 shapely
 psycopg2-binary
-sqlalchemy
+sqlalchemy<2.1
 geoalchemy2
 python-dotenv
 requests

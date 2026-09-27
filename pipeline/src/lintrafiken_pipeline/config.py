@@ -28,7 +28,10 @@ POSTGRES_PORT = os.environ.get("POSTGRES_PORT", "5432")
 
 
 def database_url() -> str:
+    # Explicit "+psycopg2" driver so the URL doesn't depend on SQLAlchemy's
+    # default dialect (SQLAlchemy 2.1 switched the default from psycopg2 to
+    # psycopg/psycopg3, which isn't installed here).
     return (
-        f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}"
+        f"postgresql+psycopg2://{POSTGRES_USER}:{POSTGRES_PASSWORD}"
         f"@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
     )
