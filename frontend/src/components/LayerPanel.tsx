@@ -137,7 +137,7 @@ function BandSlider({ label, bands, value, onChange, tickLabel, listId }: BandSl
           return (
             <span
               key={minutes}
-              className="absolute"
+              className="absolute whitespace-nowrap"
               style={{ left: `${pct}%`, transform: `translateX(${translate})` }}
             >
               {tickLabel(minutes)}
