@@ -13,6 +13,7 @@ DATA_DIR = REPO_ROOT / "pipeline" / "data"
 RAW_DIR = DATA_DIR / "raw"
 CONFIG_DIR = REPO_ROOT / "pipeline" / "config"
 CITY_ROUTES_CONFIG = CONFIG_DIR / "city_routes.yml"
+FLIGHTS_CONFIG = CONFIG_DIR / "flights.yml"
 
 GTFS_OPERATOR = "otraf"  # Östgötatrafiken, per Trafiklab GTFS Regional
 GTFS_URL = f"https://opendata.samtrafiken.se/gtfs/{GTFS_OPERATOR}/{GTFS_OPERATOR}.zip"

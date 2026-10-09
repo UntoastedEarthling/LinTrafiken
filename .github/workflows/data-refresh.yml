@@ -73,16 +73,17 @@ jobs:
           python -m lintrafiken_pipeline.ingest
           python -m lintrafiken_pipeline.heatmap
           python -m lintrafiken_pipeline.catchments
+          python -m lintrafiken_pipeline.airport
 
       - uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ vars.AWS_REGION }}
 
-      - name: Sync PMTiles to S3
+      - name: Sync PMTiles and airport metadata to S3
         run: |
           aws s3 sync pipeline/data/processed/ "s3://${{ vars.S3_BUCKET_NAME }}/tiles/" \
-            --exclude "*" --include "*.pmtiles"
+            --exclude "*" --include "*.pmtiles" --include "airport-meta.json"
 
       - name: Invalidate CloudFront cache for tiles
         run: |

@@ -10,7 +10,7 @@ const srcDir = join(here, "..", "..", "pipeline", "data", "processed");
 const destDir = join(here, "..", "public", "tiles");
 
 mkdirSync(destDir, { recursive: true });
-for (const name of ["heatmap.pmtiles", "catchments.pmtiles"]) {
+for (const name of ["heatmap.pmtiles", "catchments.pmtiles", "airport.pmtiles", "airport-meta.json"]) {
   copyFileSync(join(srcDir, name), join(destDir, name));
   console.log(`Copied ${name}`);
 }

@@ -1,0 +1,35 @@
+# Airport (LPI) travel-time layer: single source of truth for the airport location, access rules
+# and flight schedule. After editing, rerun the airport pipeline and `npm run sync-tiles`.
+# Flights run every day; times are scheduled local time (Europe/Stockholm), no delays modelled.
+airport:
+  iata: LPI
+  name: Linköping City Airport
+  lat: 58.407394
+  lon: 15.657494
+
+rules:
+  walk_only_max_minutes: 10 # within this walk of the airport, no public transport is needed
+  home_access_max_minutes: 10 # max walk from a home location to/from a bus stop
+  airport_access_max_minutes: 10 # max walk from the airport to/from a bus stop
+  transfer_walk_max_minutes: 5 # max walk between two different stops for a transfer
+  min_transfer_minutes: 4
+  arrive_before_departure_minutes: 60 # departures: be at the airport this long before takeoff
+  leave_after_landing_minutes: 10 # arrivals: journey starts this long after landing
+  band_step_minutes: 10
+  max_band_minutes: 90 # longer travel times are shown as no service
+
+# Times must be quoted: YAML 1.1 would read an unquoted 06:05 as a base-60 number.
+default_flight: KL1246 # preselected in the frontend dropdown; defaults to the first flight
+flights:
+  - id: KL1242
+    direction: departure
+    time: "06:05"
+  - id: KL1246
+    direction: departure
+    time: "17:25"
+  - id: KL1245
+    direction: arrival
+    time: "16:55"
+  - id: KL1247
+    direction: arrival
+    time: "23:05"

@@ -27,7 +27,7 @@ METRIC_CRS = "EPSG:3006"
 _to_metric = Transformer.from_crs(GEOGRAPHIC_CRS, METRIC_CRS, always_xy=True)
 
 
-def _pick_representative_dates(engine: Engine) -> dict[str, str]:
+def pick_representative_dates(engine: Engine) -> dict[str, str]:
     query = text(
         """
         SELECT date, EXTRACT(ISODOW FROM to_date(date::text, 'YYYYMMDD'))::int AS isodow,
@@ -90,7 +90,7 @@ def compute_hex_frequencies(engine: Engine) -> pd.DataFrame:
 
     stop_index = {sid: i for i, sid in enumerate(stops["stop_id"])}
 
-    dates = _pick_representative_dates(engine)
+    dates = pick_representative_dates(engine)
     logger.info("Representative dates: %s", dates)
 
     result = hexes[["hex_id", "lon", "lat"]].copy()

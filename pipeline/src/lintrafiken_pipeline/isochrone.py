@@ -37,12 +37,14 @@ def _fetch_stops(engine: Engine) -> pd.DataFrame:
     return stops
 
 
-def _query_isochrone(stop_lon: float, stop_lat: float) -> dict[int, list]:
+def query_isochrone(
+    stop_lon: float, stop_lat: float, contour_minutes: list[int] = CONTOUR_MINUTES
+) -> dict[int, list]:
     """Return {minutes: [shapely geometry, ...]} for one stop, or {} if unreachable."""
     body = {
         "locations": [{"lat": stop_lat, "lon": stop_lon}],
         "costing": "pedestrian",
-        "contours": [{"time": m} for m in CONTOUR_MINUTES],
+        "contours": [{"time": m} for m in contour_minutes],
         "polygons": True,
         "denoise": 0.1,
         # Lower generalize = boundary hugs the street network more closely (finer resolution,
@@ -73,7 +75,7 @@ def compute_catchments(engine: Engine) -> gpd.GeoDataFrame:
     n_failed = 0
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as pool:
         futures = {
-            pool.submit(_query_isochrone, row.stop_lon, row.stop_lat): row.stop_id
+            pool.submit(query_isochrone, row.stop_lon, row.stop_lat): row.stop_id
             for row in stops.itertuples()
         }
         for future in as_completed(futures):

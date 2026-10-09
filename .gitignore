@@ -21,6 +21,7 @@ pipeline/data/
 *.pmtiles
 *.mbtiles
 *.gpkg
+frontend/public/tiles/airport-meta.json
 # Valhalla auto-builds tiles/config from this on container start; only the tiny
 # (~6MB) clipped source extract is worth tracking, not the generated tile artifacts.
 infra/valhalla/*
