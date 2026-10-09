@@ -23,14 +23,19 @@ export const CATCHMENT_COLORS: Record<number, string> = {
   2: "#8a3418",
 };
 
-// Same ochre/terracotta ramp as the walking catchments, stretched over 10-180 min travel time.
+// One evenly spaced (perceptually) step per 10-min band, dark terracotta -> orange -> amber.
+// Bands beyond 90 min reuse the last color.
 export const AIRPORT_BAND_COLOR: ExpressionSpecification = [
   "interpolate",
   ["linear"],
   ["get", "minutes"],
-  10, "#8a3418",
-  20, "#c1502b",
-  40, "#d98c4a",
-  60, "#e3b978",
-  120, "#ecd3a0",
+  10, "#6b2110",
+  20, "#853016",
+  30, "#a0401d",
+  40, "#bc5023",
+  50, "#d8602a",
+  60, "#e07a2c",
+  70, "#e7922e",
+  80, "#edaa2f",
+  90, "#f2c230",
 ];
